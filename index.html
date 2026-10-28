@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b1145">
+<title>A question for you</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%97%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1b1145;
+    --ink-lift: #3a2087;
+    --pink: #ff5c9d;
+    --pink-deep: #e0337c;
+    --butter: #ffe08a;
+    --lilac: #c9b8ff;
+    --milk: #fff4f9;
+    --yes-k: 1;
+    --no-k: 1;
+    --u: clamp(1.1rem, 3.4vw + 0.6rem, 1.6rem);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Bricolage Grotesque", "Trebuchet MS", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 500;
+    color: var(--milk);
+    background:
+      radial-gradient(120% 80% at 50% 0%, var(--ink-lift) 0%, var(--ink) 62%) fixed,
+      var(--ink);
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .stage {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 2.2vh, 1.4rem);
+    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+    text-align: center;
+  }
+
+  /* ---------- heart character ---------- */
+  .heart {
+    width: min(50vw, clamp(96px, 22vh, 210px));
+    height: auto;
+    overflow: visible;
+    flex: none;
+    animation: bob 3.2s ease-in-out infinite;
+    transition: width 0.4s ease;
+    user-select: none;
+  }
+  .won .heart { width: min(60vw, clamp(130px, 32vh, 280px)); }
+  .heart.shake { animation: shake 0.45s ease; }
+
+  .heart .face g[data-m] { display: none; }
+  .heart[data-mood="idle"]   g[data-m="idle"],
+  .heart[data-mood="plead"]  g[data-m="plead"],
+  .heart[data-mood="sad"]    g[data-m="sad"],
+  .heart[data-mood="happy"]  g[data-m="happy"] { display: block; }
+
+  .tear { transform-box: fill-box; transform-origin: center; animation: tear 1.8s ease-in infinite; }
+  .tear.b { animation-delay: 0.9s; }
+
+  @keyframes bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    20% { transform: translateX(-9px) rotate(-5deg); }
+    45% { transform: translateX(8px) rotate(4deg); }
+    70% { transform: translateX(-5px) rotate(-2deg); }
+  }
+  @keyframes tear {
+    0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateY(30px) scale(1); opacity: 0; }
+  }
+
+  /* ---------- type ---------- */
+  h1 {
+    font-weight: 800;
+    font-size: clamp(2rem, 7.5vw + 0.4rem, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+    max-width: 14ch;
+    text-wrap: balance;
+  }
+  .msg {
+    margin: 0;
+    min-height: 1.5em;
+    font-size: clamp(1rem, 1.1vw + 0.85rem, 1.3rem);
+    color: var(--lilac);
+    max-width: 34ch;
+    text-wrap: balance;
+  }
+  .small { font-size: 0.95rem; color: var(--lilac); margin: 0; }
+
+  /* ---------- buttons ---------- */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem 1.25rem;
+    margin-top: 0.4rem;
+    max-width: 100%;
+  }
+
+  .btn {
+    font: inherit;
+    font-weight: 800;
+    font-size: calc(var(--u) * var(--k, 1));
+    line-height: 1.15;
+    padding: 0.6em 1.5em;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .btn:focus-visible { outline: 3px solid var(--butter); outline-offset: 4px; }
+
+  .yes {
+    --k: var(--yes-k);
+    background: var(--pink);
+    color: var(--ink);
+    box-shadow: 0 0.18em 0 var(--pink-deep);
+  }
+  .yes:active { transform: translateY(0.12em); box-shadow: 0 0.06em 0 var(--pink-deep); }
+  .yes.pop { animation: pop 0.35s ease; }
+  @keyframes pop { 50% { transform: scale(1.06); } }
+
+  .no {
+    --k: var(--no-k);
+    background: transparent;
+    color: var(--milk);
+    border-color: rgba(255, 244, 249, 0.55);
+  }
+  .no.floating {
+    position: fixed;
+    margin: 0;
+    z-index: 10;
+    transition:
+      left 0.24s cubic-bezier(0.3, 1.5, 0.5, 1),
+      top 0.24s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+
+  .share {
+    background: var(--butter);
+    color: var(--ink);
+    box-shadow: 0 0.18em 0 #d9b94c;
+    --k: 0.8;
+  }
+
+  .reset {
+    --k: 0.8;
+    background: transparent;
+    color: var(--milk);
+    border-color: rgba(255, 244, 249, 0.55);
+  }
+
+  .win-wrap { display: flex; flex-direction: column; align-items: center; gap: clamp(0.6rem, 2vh, 1.2rem); }
+
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .heart, .heart.shake, .tear, .yes.pop { animation: none; }
+    .no.floating { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="stage" id="stage">
+
+  <svg class="heart" id="heart" data-mood="idle" viewBox="-6 -6 212 184" role="img" aria-label="A small pink heart with a face">
+    <defs>
+      <linearGradient id="hg" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0" stop-color="#ff86b9"/>
+        <stop offset="1" stop-color="#f0407f"/>
+      </linearGradient>
+    </defs>
+    <path d="M100 170 C 20 110, 0 70, 0 45 C 0 18, 22 0, 50 0 C 72 0, 90 12, 100 30 C 110 12, 128 0, 150 0 C 178 0, 200 18, 200 45 C 200 70, 180 110, 100 170 Z" fill="url(#hg)"/>
+    <path d="M24 40 Q27 22 46 19" stroke="#fff" stroke-opacity="0.55" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <g class="face">
+      <circle cx="46" cy="90" r="11" fill="#e0337c" opacity="0.45"/>
+      <circle cx="154" cy="90" r="11" fill="#e0337c" opacity="0.45"/>
+
+      <g data-m="idle">
+        <ellipse cx="72" cy="66" rx="9" ry="12" fill="#1b1145"/>
+        <ellipse cx="128" cy="66" rx="9" ry="12" fill="#1b1145"/>
+        <circle cx="75" cy="61" r="3.2" fill="#fff"/>
+        <circle cx="131" cy="61" r="3.2" fill="#fff"/>
+        <path d="M84 96 Q100 112 116 96" stroke="#1b1145" stroke-width="5" stroke-linecap="round" fill="none"/>
+      </g>
+
+      <g data-m="plead">
+        <ellipse cx="72" cy="68" rx="12" ry="15" fill="#1b1145"/>
+        <ellipse cx="128" cy="68" rx="12" ry="15" fill="#1b1145"/>
+        <circle cx="76" cy="62" r="4.5" fill="#fff"/>
+        <circle cx="68" cy="75" r="2.2" fill="#fff"/>
+        <circle cx="132" cy="62" r="4.5" fill="#fff"/>
+        <circle cx="124" cy="75" r="2.2" fill="#fff"/>
+        <path d="M56 48 L86 40 M114 40 L144 48" stroke="#1b1145" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="100" cy="101" rx="7" ry="5" fill="#1b1145"/>
+      </g>
+
+      <g data-m="sad">
+        <ellipse cx="72" cy="70" rx="12" ry="15" fill="#1b1145"/>
+        <ellipse cx="128" cy="70" rx="12" ry="15" fill="#1b1145"/>
+        <circle cx="76" cy="64" r="5" fill="#fff"/>
+        <circle cx="68" cy="77" r="2.4" fill="#fff"/>
+        <circle cx="132" cy="64" r="5" fill="#fff"/>
+        <circle cx="124" cy="77" r="2.4" fill="#fff"/>
+        <path d="M54 52 L86 38 M114 38 L146 52" stroke="#1b1145" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M84 108 Q100 90 116 108" stroke="#1b1145" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <ellipse class="tear" cx="64" cy="88" rx="5" ry="7" fill="#8fd3ff"/>
+        <ellipse class="tear b" cx="136" cy="88" rx="5" ry="7" fill="#8fd3ff"/>
+      </g>
+
+      <g data-m="happy">
+        <path d="M60 70 Q72 52 84 70 M116 70 Q128 52 140 70" stroke="#1b1145" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+        <path d="M78 90 Q100 124 122 90 Z" fill="#1b1145" stroke="#1b1145" stroke-width="4" stroke-linejoin="round"/>
+        <ellipse cx="100" cy="103" rx="10" ry="5" fill="#ff8fb8"/>
+      </g>
+    </g>
+  </svg>
+
+  <section class="win-wrap" id="ask" style="display:contents">
+    <h1 id="question"></h1>
+    <p class="msg" id="msg" aria-live="polite"></p>
+    <div class="row" id="row">
+      <button type="button" class="btn yes" id="yes">Yes</button>
+      <button type="button" class="btn no" id="no">No</button>
+    </div>
+  </section>
+
+  <section class="win-wrap" id="win" hidden>
+    <h1 id="winHead" tabindex="-1">Yay! Girlfriend status restored.</h1>
+    <p class="msg" id="winBody"></p>
+    <div class="row">
+      <button type="button" class="btn share" id="share"></button>
+      <button type="button" class="btn reset" id="reset">Play again</button>
+    </div>
+    <p class="small">Tap anywhere for more confetti</p>
+  </section>
+
+</main>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ============ EDIT THESE ============ */
+  const CONFIG = {
+    herName: "Gia Khánh",            // e.g. "Linh". Leave empty to skip her name.
+    yourName: "Wei An",
+    question: "Will you be my girlfriend again?",
+    intro: "One question. Two buttons. Take your time.",
+    noLabels: ["No", "Are you sure?", "Really?", "Think about it", "Pretty please?", "You sure sure?", "Hmm, no?", "No"],
+    pleas: [
+      "The No button just ran away. How odd.",
+      "Maybe try the other one?",
+      "I’m starting to feel a bit sad.",
+      "No is very shy today.",
+      "Look how big Yes is getting.",
+      "I made Yes bigger just for you.",
+      "The heart is about to cry.",
+      "I’ll wait. I’m very patient.",
+      "You can’t catch it, you know.",
+      "Yes is right there. It’s huge."
+    ],
+    winNoTries: "No hesitation at all. I love that.",
+    winWithTries: n => `You tried to say no ${n} ${n === 1 ? "time" : "times"}. The button was never going to let you.`,
+    shareText: "I said yes. 💕 I’ll be your girlfriend again."
+  };
+  /* ==================================== */
+
+  const $ = id => document.getElementById(id);
+  const root = document.documentElement;
+  const stage = $("stage"), heart = $("heart"), ask = $("ask"), win = $("win");
+  const yesBtn = $("yes"), noBtn = $("no"), msg = $("msg");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  $("question").textContent = CONFIG.herName
+    ? `${CONFIG.herName}, ${CONFIG.question.charAt(0).toLowerCase()}${CONFIG.question.slice(1)}`
+    : CONFIG.question;
+  msg.textContent = CONFIG.intro;
+
+  let tries = 0, lastCount = 0, floating = false, done = false, yesK = 1;
+
+  /* ---------- heart mood ---------- */
+  const baseMood = () => (tries >= 3 ? "sad" : tries >= 1 ? "plead" : "idle");
+  const setMood = m => heart.setAttribute("data-mood", m);
+
+  /* ---------- Yes grows ---------- */
+  function applyScale() {
+    const vw = root.clientWidth, vh = window.innerHeight;
+    const w1 = yesBtn.offsetWidth / yesK;
+    const h1 = yesBtn.offsetHeight / yesK;
+    const kMax = Math.max(1, Math.min((vw * 0.88) / w1, (vh * 0.3) / h1, 5));
+    yesK = Math.min(1 + tries * 0.3, kMax);
+    root.style.setProperty("--yes-k", yesK.toFixed(3));
+    root.style.setProperty("--no-k", Math.max(0.7, 1 - tries * 0.04).toFixed(3));
+  }
+
+  /* ---------- No dodges ---------- */
+  function moveNo(px, py) {
+    const m = 10;
+    if (!floating) {
+      const r = noBtn.getBoundingClientRect();
+      noBtn.style.left = r.left + "px";
+      noBtn.style.top = r.top + "px";
+      noBtn.classList.add("floating");
+      floating = true;
+      void noBtn.offsetWidth;
+    }
+    const vw = root.clientWidth, vh = window.innerHeight;
+    const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+    const y = yesBtn.getBoundingClientRect();
+    const pad = 16;
+    const cur = { x: parseFloat(noBtn.style.left) || 0, y: parseFloat(noBtn.style.top) || 0 };
+    if (px == null) { px = cur.x + w / 2; py = cur.y + h / 2; }
+
+    let best = null, bestD = -1;
+    for (let i = 0; i < 48; i++) {
+      const x = m + Math.random() * Math.max(0, vw - w - 2 * m);
+      const t = m + Math.random() * Math.max(0, vh - h - 2 * m);
+      const hitsYes = x < y.right + pad && x + w > y.left - pad && t < y.bottom + pad && t + h > y.top - pad;
+      if (hitsYes) continue;
+      const d = Math.hypot(x + w / 2 - px, t + h / 2 - py);
+      if (d > bestD) { bestD = d; best = { x, t }; }
+    }
+    if (!best) best = { x: m, t: m };
+    noBtn.style.left = best.x + "px";
+    noBtn.style.top = best.t + "px";
+  }
+
+  function onTry() {
+    tries++;
+    noBtn.textContent = CONFIG.noLabels[Math.min(tries, CONFIG.noLabels.length - 1)];
+    msg.textContent = CONFIG.pleas[Math.min(tries - 1, CONFIG.pleas.length - 1)];
+    setMood(baseMood());
+    heart.classList.remove("shake"); void heart.getBoundingClientRect(); heart.classList.add("shake");
+    yesBtn.classList.remove("pop"); void yesBtn.offsetWidth; yesBtn.classList.add("pop");
+    applyScale();
+  }
+
+  function dodge(px, py) {
+    if (done) return;
+    const now = performance.now();
+    if (now - lastCount > 450) { lastCount = now; onTry(); }
+    moveNo(px, py);
+  }
+
+  // mouse: run away before the cursor reaches it
+  document.addEventListener("pointermove", e => {
+    if (done || e.pointerType !== "mouse") return;
+    const r = noBtn.getBoundingClientRect();
+    const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+    const dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+    if (Math.hypot(dx, dy) < 70) dodge(e.clientX, e.clientY);
+  });
+
+  // tap / click / keyboard: it always escapes
+  noBtn.addEventListener("pointerdown", e => { e.preventDefault(); dodge(e.clientX, e.clientY); });
+  noBtn.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+  noBtn.addEventListener("click", e => { e.preventDefault(); dodge(); });
+  noBtn.addEventListener("focus", () => dodge());
+
+  // Yes: heart gets happy on hover (mouse only)
+  yesBtn.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !done) setMood("happy"); });
+  yesBtn.addEventListener("pointerleave", () => { if (!done) setMood(baseMood()); });
+
+  window.addEventListener("resize", () => {
+    if (done) return;
+    applyScale();
+    if (floating) {
+      const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+      const x = Math.min(Math.max(10, parseFloat(noBtn.style.left) || 10), Math.max(10, root.clientWidth - w - 10));
+      const t = Math.min(Math.max(10, parseFloat(noBtn.style.top) || 10), Math.max(10, window.innerHeight - h - 10));
+      noBtn.style.left = x + "px";
+      noBtn.style.top = t + "px";
+    }
+  });
+
+  /* ---------- confetti ---------- */
+  const cv = $("confetti"), ctx = cv.getContext("2d");
+  const HEART = new Path2D("M100 170 C 20 110, 0 70, 0 45 C 0 18, 22 0, 50 0 C 72 0, 90 12, 100 30 C 110 12, 128 0, 150 0 C 178 0, 200 18, 200 45 C 200 70, 180 110, 100 170 Z");
+  const COLORS = ["#ff5c9d", "#ffe08a", "#c9b8ff", "#fff4f9", "#ff86b9"];
+  let parts = [], raf = 0;
+
+  function fit() {
+    const d = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(window.innerWidth * d);
+    cv.height = Math.round(window.innerHeight * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  fit();
+  window.addEventListener("resize", fit);
+
+  function burst(x, y, n, angle, spread) {
+    n = Math.round(reduced ? n * 0.4 : n);
+    for (let i = 0; i < n; i++) {
+      const a = angle + (Math.random() - 0.5) * spread;
+      const v = 6 + Math.random() * 9;
+      const r = Math.random();
+      parts.push({
+        x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3,
+        s: 10 + Math.random() * 16, c: COLORS[i % COLORS.length],
+        t: r < 0.55 ? "h" : r < 0.8 ? "c" : "r"
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    const H = window.innerHeight;
+    parts = parts.filter(p => p.y < H + 40);
+    for (const p of parts) {
+      p.vy += 0.22; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      if (p.t === "h") {
+        const k = p.s / 200;
+        ctx.scale(k, k); ctx.translate(-100, -86); ctx.fill(HEART);
+      } else if (p.t === "c") {
+        ctx.beginPath(); ctx.arc(0, 0, p.s / 3, 0, 6.3); ctx.fill();
+      } else {
+        ctx.fillRect(-p.s / 3, -p.s / 6, p.s * 0.66, p.s / 3);
+      }
+      ctx.restore();
+    }
+    if (parts.length) raf = requestAnimationFrame(tick);
+    else { raf = 0; ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+  }
+
+  function celebrate() {
+    const w = window.innerWidth, h = window.innerHeight;
+    burst(w * 0.12, h, 45, -Math.PI / 2 + 0.55, 0.9);
+    burst(w * 0.88, h, 45, -Math.PI / 2 - 0.55, 0.9);
+    burst(w / 2, h * 0.62, 55, -Math.PI / 2, 2.6);
+  }
+
+  /* ---------- Yes! ---------- */
+  function sayYes() {
+    if (done) return;
+    done = true;
+    ask.hidden = true;
+    win.hidden = false;
+    stage.classList.add("won");
+    setMood("happy");
+
+    $("winBody").textContent = tries === 0 ? CONFIG.winNoTries : CONFIG.winWithTries(tries);
+    $("share").textContent = `Tell ${CONFIG.yourName}`;
+    celebrate();
+    $("winHead").focus({ preventScroll: true });
+  }
+  yesBtn.addEventListener("click", sayYes);
+
+  // tap anywhere on the win screen for more confetti (one listener, safe across replays)
+  document.addEventListener("pointerdown", e => {
+    if (!done || e.target.closest("button")) return;
+    burst(e.clientX, e.clientY, 36, -Math.PI / 2, 2.8);
+  });
+
+  /* ---------- Play again ---------- */
+  function resetAll() {
+    tries = 0; lastCount = 0; floating = false; done = false; yesK = 1;
+    parts = [];
+    noBtn.classList.remove("floating");
+    noBtn.style.left = "";
+    noBtn.style.top = "";
+    noBtn.textContent = CONFIG.noLabels[0];
+    msg.textContent = CONFIG.intro;
+    root.style.setProperty("--yes-k", "1");
+    root.style.setProperty("--no-k", "1");
+    win.hidden = true;
+    ask.hidden = false;
+    stage.classList.remove("won");
+    setMood("idle");
+    window.scrollTo(0, 0);
+    yesBtn.focus({ preventScroll: true });
+  }
+  $("reset").addEventListener("click", resetAll);
+
+  // This is a static page, so it can't notify you. The share button sends the news.
+  $("share").addEventListener("click", async () => {
+    const btn = $("share");
+    const text = CONFIG.shareText;
+    try {
+      if (navigator.share) { await navigator.share({ text }); return; }
+      await navigator.clipboard.writeText(text);
+      btn.textContent = `Copied. Paste it to ${CONFIG.yourName}.`;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+      btn.textContent = "Screenshot this and send it!";
+    }
+  });
+})();
+</script>
+</body>
+</html>
